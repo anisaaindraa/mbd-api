@@ -23,7 +23,7 @@ return function (ContainerBuilder $containerBuilder) {
                 ],
                 'db' => [
                     'host' => '127.0.0.1',
-                    'dbname' => 'mbd-slim-api',
+                    'dbname' => 'toko_buah',
                     'user' => 'root',
                     'password' => '',
                 ]
