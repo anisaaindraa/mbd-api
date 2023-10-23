@@ -11,10 +11,10 @@ use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 
 return function (App $app) {
     // get
-    $app->get('/ReadBuah', function (Request $request, Response $response) {
+    $app->get('/buah', function (Request $request, Response $response) {
         $db = $this->get(PDO::class);
 
-        $query = $db->query('SELECT * FROM ReadBuah');
+        $query = $db->query('SELECT * FROM buah');
         $results = $query->fetchAll(PDO::FETCH_ASSOC);
         $response->getBody()->write(json_encode($results));
 
@@ -22,10 +22,10 @@ return function (App $app) {
     });
 
     // get by id
-    $app->get('/ReadBuah/{id_buah}', function (Request $request, Response $response, $args) {
+    $app->get('/buah/{id_buah}', function (Request $request, Response $response, $args) {
         $db = $this->get(PDO::class);
 
-        $query = $db->prepare('SELECT * FROM ReadBuah WHERE id_buah=?');
+        $query = $db->prepare('SELECT * FROM buah WHERE id_buah=?');
         $query->execute([$args['id_buah']]);
         $results = $query->fetchAll(PDO::FETCH_ASSOC);
         $response->getBody()->write(json_encode($results[0]));
