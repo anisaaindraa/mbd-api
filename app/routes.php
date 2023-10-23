@@ -10,27 +10,58 @@ use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 
 return function (App $app) {
-    // get
+    // get buah
     $app->get('/buah', function (Request $request, Response $response) {
         $db = $this->get(PDO::class);
 
-        $query = $db->query('SELECT * FROM buah');
+        $query = $db->query('CALL ReadBuah()');
         $results = $query->fetchAll(PDO::FETCH_ASSOC);
         $response->getBody()->write(json_encode($results));
 
         return $response->withHeader("Content-Type", "application/json");
     });
 
-    // get by id
-    $app->get('/buah/{id_buah}', function (Request $request, Response $response, $args) {
+    // get penjual
+    $app->get('/penjual', function (Request $request, Response $response) {
         $db = $this->get(PDO::class);
 
-        $query = $db->prepare('SELECT * FROM buah WHERE id_buah=?');
-        $query->execute([$args['id_buah']]);
+        $query = $db->query('CALL ReadPenjual()');
         $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        $response->getBody()->write(json_encode($results[0]));
+        $response->getBody()->write(json_encode($results));
 
         return $response->withHeader("Content-Type", "application/json");
     });
 
+    // get pembeli
+    $app->get('/pembeli', function (Request $request, Response $response) {
+        $db = $this->get(PDO::class);
+
+        $query = $db->query('CALL ReadPembeli()');
+        $results = $query->fetchAll(PDO::FETCH_ASSOC);
+        $response->getBody()->write(json_encode($results));
+
+        return $response->withHeader("Content-Type", "application/json");
+    });
+
+    // get transaksi
+    $app->get('/transaksi', function (Request $request, Response $response) {
+        $db = $this->get(PDO::class);
+
+        $query = $db->query('CALL ReadTransaksi()');
+        $results = $query->fetchAll(PDO::FETCH_ASSOC);
+        $response->getBody()->write(json_encode($results));
+
+        return $response->withHeader("Content-Type", "application/json");
+    });
+
+    // get detail_transaksi
+    $app->get('/detail_transaksi', function (Request $request, Response $response) {
+        $db = $this->get(PDO::class);
+
+        $query = $db->query('CALL ReadDetailTransaksi()');
+        $results = $query->fetchAll(PDO::FETCH_ASSOC);
+        $response->getBody()->write(json_encode($results));
+
+        return $response->withHeader("Content-Type", "application/json");
+    });
 };
