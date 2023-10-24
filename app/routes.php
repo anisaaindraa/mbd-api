@@ -64,6 +64,4 @@ return function (App $app) {
 
         return $response->withHeader("Content-Type", "application/json");
     });
-
-    
 };
