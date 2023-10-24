@@ -64,4 +64,64 @@ return function (App $app) {
 
         return $response->withHeader("Content-Type", "application/json");
     });
+
+    // get by id buah
+    $app->get('/buah/{id_buah}', function (Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+
+        $query = $db->prepare('SELECT * FROM buah WHERE id_buah=?');
+        $query->execute([$args['id_buah']]);
+        $results = $query->fetchAll(PDO::FETCH_ASSOC);
+        $response->getBody()->write(json_encode($results[0]));
+
+        return $response->withHeader("Content-Type", "application/json");
+    });
+
+    // get by pembeli
+    $app->get('/pembeli/{id_pembeli}', function (Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+
+        $query = $db->prepare('SELECT * FROM pembeli WHERE id_pembeli=?');
+        $query->execute([$args['id_pembeli']]);
+        $results = $query->fetchAll(PDO::FETCH_ASSOC);
+        $response->getBody()->write(json_encode($results[0]));
+
+        return $response->withHeader("Content-Type", "application/json");
+    });
+    
+    // get by penjual
+    $app->get('/penjual/{id_penjual}', function (Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+
+        $query = $db->prepare('SELECT * FROM penjual WHERE id_penjual=?');
+        $query->execute([$args['id_penjual']]);
+        $results = $query->fetchAll(PDO::FETCH_ASSOC);
+        $response->getBody()->write(json_encode($results[0]));
+
+        return $response->withHeader("Content-Type", "application/json");
+    });
+
+    // get by detail transaksi
+    $app->get('/detail_transaksi/{id_dt}', function (Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+
+        $query = $db->prepare('SELECT * FROM detail_transaksi WHERE id_dt=?');
+        $query->execute([$args['id_dt']]);
+        $results = $query->fetchAll(PDO::FETCH_ASSOC);
+        $response->getBody()->write(json_encode($results[0]));
+
+        return $response->withHeader("Content-Type", "application/json");
+    });
+
+    // get by transaksi
+    $app->get('/transaksi/{id_transaksi}', function (Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+
+        $query = $db->prepare('SELECT * FROM transaksi WHERE id_transaksi=?');
+        $query->execute([$args['id_transaksi']]);
+        $results = $query->fetchAll(PDO::FETCH_ASSOC);
+        $response->getBody()->write(json_encode($results[0]));
+
+        return $response->withHeader("Content-Type", "application/json");
+    });
 };
