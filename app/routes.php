@@ -124,4 +124,77 @@ return function (App $app) {
 
         return $response->withHeader("Content-Type", "application/json");
     });
+
+    // delete by buah
+    $app->delete('/buah/{id_buah}', function (Request $request, Response $response, $args) {
+        $currentId = $args['id_buah'];
+        $db = $this->get(PDO::class);
+    
+        try {
+            $query = $db->prepare('CALL DeleteBuah(?)'); // Add a semicolon here
+            $query->execute([$currentId]);
+    
+            if ($query->rowCount() === 0) {
+                $response = $response->withStatus(404);
+                $response->getBody()->write(json_encode(
+                    [
+                        'message' => 'Data tidak ditemukan'
+                    ]
+                ));
+            } else {
+                $response->getBody()->write(json_encode(
+                    [
+                        'message' => 'buah dengan id ' . $currentId . ' dihapus dari database'
+                    ]
+                ));
+            }
+        } catch (PDOException $e) {
+            $response = $response->withStatus(500);
+            $response->getBody()->write(json_encode(
+                [
+                    'message' => 'Database error ' . $e->getMessage()
+                ]
+            ));
+        }
+    
+        return $response->withHeader("Content-Type", "application/json");
+    });
+    
+    // delete by pembeli
+    $app->delete('/pembeli/{id_pembeli}', function (Request $request, Response $response, $args) {
+        $currentId = $args['id_pembeli'];
+        $db = $this->get(PDO::class);
+    
+        try {
+            $query = $db->prepare('CALL DeletePembeli(?)'); // Add a semicolon here
+            $query->execute([$currentId]);
+    
+            if ($query->rowCount() === 0) {
+                $response = $response->withStatus(404);
+                $response->getBody()->write(json_encode(
+                    [
+                        'message' => 'Data tidak ditemukan'
+                    ]
+                ));
+            } else {
+                $response->getBody()->write(json_encode(
+                    [
+                        'message' => 'pembeli dengan id ' . $currentId . ' dihapus dari database'
+                    ]
+                ));
+            }
+        } catch (PDOException $e) {
+            $response = $response->withStatus(500);
+            $response->getBody()->write(json_encode(
+                [
+                    'message' => 'Database error ' . $e->getMessage()
+                ]
+            ));
+        }
+    
+        return $response->withHeader("Content-Type", "application/json");
+    }); 
+    // delete by penjual
+    // delete by detail_transaksi
+    // delete by transaksi
 };
