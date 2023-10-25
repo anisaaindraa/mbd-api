@@ -10,191 +10,329 @@ use Slim\App;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 
 return function (App $app) {
-    // get buah
-    $app->get('/buah', function (Request $request, Response $response) {
+    // get buah by ID
+    $app->get('/buah/{buah_id}', function(Request $request, Response $response, $args) {
         $db = $this->get(PDO::class);
+        $id = $args['buah_id'];
 
-        $query = $db->query('CALL ReadBuah()');
-        $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        $response->getBody()->write(json_encode($results));
+        // Menyiapkan SQL untuk memanggil procedure GetBarang
+        $sql = "CALL GetBuahByID(:buah_id)";
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':buah_id', $id, PDO::PARAM_INT);
 
-        return $response->withHeader("Content-Type", "application/json");
-    });
-
-    // get penjual
-    $app->get('/penjual', function (Request $request, Response $response) {
-        $db = $this->get(PDO::class);
-
-        $query = $db->query('CALL ReadPenjual()');
-        $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        $response->getBody()->write(json_encode($results));
-
-        return $response->withHeader("Content-Type", "application/json");
-    });
-
-    // get pembeli
-    $app->get('/pembeli', function (Request $request, Response $response) {
-        $db = $this->get(PDO::class);
-
-        $query = $db->query('CALL ReadPembeli()');
-        $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        $response->getBody()->write(json_encode($results));
-
-        return $response->withHeader("Content-Type", "application/json");
-    });
-
-    // get transaksi
-    $app->get('/transaksi', function (Request $request, Response $response) {
-        $db = $this->get(PDO::class);
-
-        $query = $db->query('CALL ReadTransaksi()');
-        $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        $response->getBody()->write(json_encode($results));
-
-        return $response->withHeader("Content-Type", "application/json");
-    });
-
-    // get detail_transaksi
-    $app->get('/detail_transaksi', function (Request $request, Response $response) {
-        $db = $this->get(PDO::class);
-
-        $query = $db->query('CALL ReadDetailTransaksi()');
-        $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        $response->getBody()->write(json_encode($results));
-
-        return $response->withHeader("Content-Type", "application/json");
-    });
-
-    // get by id buah
-    $app->get('/buah/{id_buah}', function (Request $request, Response $response, $args) {
-        $db = $this->get(PDO::class);
-
-        $query = $db->prepare('SELECT * FROM buah WHERE id_buah=?');
-        $query->execute([$args['id_buah']]);
-        $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        $response->getBody()->write(json_encode($results[0]));
-
-        return $response->withHeader("Content-Type", "application/json");
-    });
-
-    // get by pembeli
-    $app->get('/pembeli/{id_pembeli}', function (Request $request, Response $response, $args) {
-        $db = $this->get(PDO::class);
-
-        $query = $db->prepare('SELECT * FROM pembeli WHERE id_pembeli=?');
-        $query->execute([$args['id_pembeli']]);
-        $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        $response->getBody()->write(json_encode($results[0]));
-
-        return $response->withHeader("Content-Type", "application/json");
-    });
-    
-    // get by penjual
-    $app->get('/penjual/{id_penjual}', function (Request $request, Response $response, $args) {
-        $db = $this->get(PDO::class);
-
-        $query = $db->prepare('SELECT * FROM penjual WHERE id_penjual=?');
-        $query->execute([$args['id_penjual']]);
-        $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        $response->getBody()->write(json_encode($results[0]));
-
-        return $response->withHeader("Content-Type", "application/json");
-    });
-
-    // get by detail transaksi
-    $app->get('/detail_transaksi/{id_dt}', function (Request $request, Response $response, $args) {
-        $db = $this->get(PDO::class);
-
-        $query = $db->prepare('SELECT * FROM detail_transaksi WHERE id_dt=?');
-        $query->execute([$args['id_dt']]);
-        $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        $response->getBody()->write(json_encode($results[0]));
-
-        return $response->withHeader("Content-Type", "application/json");
-    });
-
-    // get by transaksi
-    $app->get('/transaksi/{id_transaksi}', function (Request $request, Response $response, $args) {
-        $db = $this->get(PDO::class);
-
-        $query = $db->prepare('SELECT * FROM transaksi WHERE id_transaksi=?');
-        $query->execute([$args['id_transaksi']]);
-        $results = $query->fetchAll(PDO::FETCH_ASSOC);
-        $response->getBody()->write(json_encode($results[0]));
-
-        return $response->withHeader("Content-Type", "application/json");
-    });
-
-    // delete by buah
-    $app->delete('/buah/{id_buah}', function (Request $request, Response $response, $args) {
-        $currentId = $args['id_buah'];
-        $db = $this->get(PDO::class);
-    
-        try {
-            $query = $db->prepare('CALL DeleteBuah(?)'); // Add a semicolon here
-            $query->execute([$currentId]);
-    
-            if ($query->rowCount() === 0) {
-                $response = $response->withStatus(404);
-                $response->getBody()->write(json_encode(
-                    [
-                        'message' => 'Data tidak ditemukan'
-                    ]
-                ));
+        // Jalankan query
+        if ($stmt->execute()) {
+            // Mengambil hasil dari procedure
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if ($result) {
+                $response->getBody()->write(json_encode($result[0]));
             } else {
-                $response->getBody()->write(json_encode(
-                    [
-                        'message' => 'buah dengan id ' . $currentId . ' dihapus dari database'
-                    ]
-                ));
+                // Jika data tidak ditemukan, kirim respons dengan status 404
+                $response->getBody()->write(json_encode(['error' => 'Data buah tidak ditemukan']));
+                $response = $response->withStatus(404);
             }
-        } catch (PDOException $e) {
-            $response = $response->withStatus(500);
+        } else {
+            // Tangani kesalahan eksekusi query
+            $errorInfo = $stmt->errorInfo();
+            $response->getBody()->write(json_encode(['error' => $errorInfo]));
+            $response = $response->withStatus(500); // Atur status kode 500 untuk kesalahan server
+        }
+        return $response->withHeader("Content-Type", "application/json");
+    });
+
+     // Get penjual by ID
+    $app->get('/penjual/{penjual_id}', function(Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+        $id = $args['penjual_id'];
+
+        // Menyiapkan SQL untuk memanggil procedure GetPenjualByID
+        $sql = "CALL GetPenjualByID(:penjual_id)";
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':penjual_id', $id, PDO::PARAM_INT);
+
+        // Jalankan query
+        if ($stmt->execute()) {
+            // Mengambil hasil dari procedure
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if ($result) {
+                $response->getBody()->write(json_encode($result[0]));
+            } else {
+                // Jika data tidak ditemukan, kirim respons dengan status 404
+                $response->getBody()->write(json_encode(['error' => 'Data penjual tidak ditemukan']));
+                $response = $response->withStatus(404);
+            }
+        } else {
+            // Tangani kesalahan eksekusi query
+            $errorInfo = $stmt->errorInfo();
+            $response->getBody()->write(json_encode(['error' => $errorInfo]));
+            $response = $response->withStatus(500); // Atur status kode 500 untuk kesalahan server
+        }
+        return $response->withHeader("Content-Type", "application/json");
+    });
+
+    // get pembeli by ID
+    $app->get('/pembeli/{pembeli_id}', function(Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+        $id = $args['pembeli_id'];
+
+        // Menyiapkan SQL untuk memanggil procedure GetBarang
+        $sql = "CALL GetPembeliByID(:pembeli_id)";
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':pembeli_id', $id, PDO::PARAM_INT);
+
+        // Jalankan query
+        if ($stmt->execute()) {
+            // Mengambil hasil dari procedure
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if ($result) {
+                $response->getBody()->write(json_encode($result[0]));
+            } else {
+                // Jika data tidak ditemukan, kirim respons dengan status 404
+                $response->getBody()->write(json_encode(['error' => 'Data pembeli tidak ditemukan']));
+                $response = $response->withStatus(404);
+            }
+        } else {
+            // Tangani kesalahan eksekusi query
+            $errorInfo = $stmt->errorInfo();
+            $response->getBody()->write(json_encode(['error' => $errorInfo]));
+            $response = $response->withStatus(500); // Atur status kode 500 untuk kesalahan server
+        }
+        return $response->withHeader("Content-Type", "application/json");
+    });
+
+        // get detail transaksi by ID
+    $app->get('/detail_transaksi/{detail_transaksi_id}', function(Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+        $id = $args['detail_transaksi_id'];
+
+        // Menyiapkan SQL untuk memanggil procedure GetBarang
+        $sql = "CALL GetDetailTransaksiByID(:detail_transaksi_id)";
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':detail_transaksi_id', $id, PDO::PARAM_INT);
+
+        // Jalankan query
+        if ($stmt->execute()) {
+            // Mengambil hasil dari procedure
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if ($result) {
+                $response->getBody()->write(json_encode($result[0]));
+            } else {
+                // Jika data tidak ditemukan, kirim respons dengan status 404
+                $response->getBody()->write(json_encode(['error' => 'Data detail_transaksi tidak ditemukan']));
+                $response = $response->withStatus(404);
+            }
+        } else {
+            // Tangani kesalahan eksekusi query
+            $errorInfo = $stmt->errorInfo();
+            $response->getBody()->write(json_encode(['error' => $errorInfo]));
+            $response = $response->withStatus(500); // Atur status kode 500 untuk kesalahan server
+        }
+        return $response->withHeader("Content-Type", "application/json");
+    });
+
+    // get transaksi by ID
+    $app->get('/transaksi/{transaksi_id}', function(Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+        $id = $args['transaksi_id'];
+
+        // Menyiapkan SQL untuk memanggil procedure GetBarang
+        $sql = "CALL GetTransaksiByID(:transaksi_id)";
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':transaksi_id', $id, PDO::PARAM_INT);
+
+        // Jalankan query
+        if ($stmt->execute()) {
+            // Mengambil hasil dari procedure
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if ($result) {
+                $response->getBody()->write(json_encode($result[0]));
+            } else {
+                // Jika data tidak ditemukan, kirim respons dengan status 404
+                $response->getBody()->write(json_encode(['error' => 'Data transaksi tidak ditemukan']));
+                $response = $response->withStatus(404);
+            }
+        } else {
+            // Tangani kesalahan eksekusi query
+            $errorInfo = $stmt->errorInfo();
+            $response->getBody()->write(json_encode(['error' => $errorInfo]));
+            $response = $response->withStatus(500); // Atur status kode 500 untuk kesalahan server
+        }
+        return $response->withHeader("Content-Type", "application/json");
+    });
+
+    // Post buah
+    $app->post('/buah', function(Request $request, Response $response) {
+        $parsedBody = $request->getParsedBody();
+
+        $buah_id = $parsedBody['buah_id'];
+        $nama_buah = $parsedBody['nama_buah'];
+        $harga = $parsedBody['harga'];
+        $stok = $parsedBody['stok'];
+
+        $db = $this->get(PDO::class);
+
+        try {
+            $query = $db->prepare('CALL CreateBuah(?, ?, ?, ?)');
+            $query->bindParam(1, $buah_id, PDO::PARAM_INT);
+            $query->bindParam(2, $nama_buah, PDO::PARAM_STR);
+            $query->bindParam(3, $harga, PDO::PARAM_INT);
+            $query->bindParam(4, $stok, PDO::PARAM_INT);
+
+            $query->execute();
+
             $response->getBody()->write(json_encode(
                 [
-                    'message' => 'Database error ' . $e->getMessage()
+                    'message' => 'Detail buah disimpan dengan id ' . $buah_id
+                ]
+            ));
+        } catch (PDOException $e) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'Gagal menyimpan buah: ' . $e->getMessage()
                 ]
             ));
         }
-    
         return $response->withHeader("Content-Type", "application/json");
     });
-    
-    // delete by pembeli
-    $app->delete('/pembeli/{id_pembeli}', function (Request $request, Response $response, $args) {
-        $currentId = $args['id_pembeli'];
+
+    // POST penjual
+    $app->post('/penjual', function(Request $request, Response $response) {
+        $parsedBody = $request->getParsedBody();
+
+        $penjual_id = $parsedBody['penjual_id'];
+        $nama_penjual = $parsedBody['nama_penjual'];
+        $alamat_penjual = $parsedBody['alamat_penjual'];
+        $telepon_penjual = $parsedBody['telepon_penjual'];
+
         $db = $this->get(PDO::class);
-    
+
         try {
-            $query = $db->prepare('CALL DeletePembeli(?)'); // Add a semicolon here
-            $query->execute([$currentId]);
-    
-            if ($query->rowCount() === 0) {
-                $response = $response->withStatus(404);
-                $response->getBody()->write(json_encode(
-                    [
-                        'message' => 'Data tidak ditemukan'
-                    ]
-                ));
-            } else {
-                $response->getBody()->write(json_encode(
-                    [
-                        'message' => 'pembeli dengan id ' . $currentId . ' dihapus dari database'
-                    ]
-                ));
-            }
-        } catch (PDOException $e) {
-            $response = $response->withStatus(500);
+            $query = $db->prepare('CALL CreatePenjual(?, ?, ?, ?)');
+            $query->bindParam(1, $penjual_id, PDO::PARAM_INT);
+            $query->bindParam(2, $nama_penjual, PDO::PARAM_STR);
+            $query->bindParam(3, $alamat_penjual, PDO::PARAM_STR);
+            $query->bindParam(4, $telepon_penjual, PDO::PARAM_STR);
+
+            $query->execute();
+
             $response->getBody()->write(json_encode(
                 [
-                    'message' => 'Database error ' . $e->getMessage()
+                    'message' => 'Detail penjual disimpan dengan id ' . $penjual_id
+                ]
+            ));
+        } catch (PDOException $e) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'Gagal menyimpan penjual: ' . $e->getMessage()
                 ]
             ));
         }
-    
         return $response->withHeader("Content-Type", "application/json");
-    }); 
-    // delete by penjual
-    // delete by detail_transaksi
-    // delete by transaksi
+    });
+
+    // POST pembeli
+    $app->post('/pembeli', function(Request $request, Response $response) {
+        $parsedBody = $request->getParsedBody();
+
+        $pembeli_id = $parsedBody['pembeli_id'];
+        $nama = $parsedBody['nama'];
+        $alamat = $parsedBody['alamat'];
+        $telepon = $parsedBody['telepon'];
+
+        $db = $this->get(PDO::class);
+
+        try {
+            $query = $db->prepare('CALL CreatePembeli(?, ?, ?, ?)');
+            $query->bindParam(1, $pembeli_id, PDO::PARAM_INT);
+            $query->bindParam(2, $nama, PDO::PARAM_STR);
+            $query->bindParam(3, $alamat, PDO::PARAM_STR);
+            $query->bindParam(4, $telepon, PDO::PARAM_STR);
+
+            $query->execute();
+
+            $response->getBody()->write(json_encode(
+                [
+                    'message' => 'Detail pembeli disimpan dengan id ' . $pembeli_id
+                ]
+            ));
+        } catch (PDOException $e) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'Gagal menyimpan pembeli: ' . $e->getMessage()
+                ]
+            ));
+        }
+        return $response->withHeader("Content-Type", "application/json");
+    });
+
+// POST detail transaksi
+$app->post('/detail_transaksi', function(Request $request, Response $response) {
+    $parsedBody = $request->getParsedBody();
+
+    $detail_transaksi_id = $parsedBody['detail_transaksi_id'];
+    $transaksi_id = $parsedBody['transaksi_id'];
+    $buah_id = $parsedBody['buah_id'];
+    $jumlah = $parsedBody['jumlah'];
+    $harga_total = $parsedBody['harga_total'];
+
+    $db = $this->get(PDO::class);
+
+    try {
+        $query = $db->prepare('CALL CreateDetailTransaksi(?, ?, ?, ?, ?)');
+        $query->bindParam(1, $detail_transaksi_id, PDO::PARAM_INT);
+        $query->bindParam(2, $transaksi_id, PDO::PARAM_INT);
+        $query->bindParam(3, $buah_id, PDO::PARAM_INT);
+        $query->bindParam(4, $jumlah, PDO::PARAM_INT);
+        $query->bindParam(5, $harga_total, PDO::PARAM_INT);
+
+        $query->execute();
+
+        $response->getBody()->write(json_encode(
+            [
+                'message' => 'Detail transaksi disimpan dengan id ' . $detail_transaksi_id
+            ]
+        ));
+    } catch (PDOException $e) {
+        $response->getBody()->write(json_encode(
+            [
+                'error' => 'Gagal menyimpan detail transaksi: ' . $e->getMessage()
+            ]
+        ));
+    }
+    return $response->withHeader("Content-Type", "application/json");
+});
+
+// POST transaksi
+$app->post('/transaksi', function(Request $request, Response $response) {
+    $parsedBody = $request->getParsedBody();
+
+    $transaksi_id = $parsedBody['transaksi_id'];
+    $tanggal = $parsedBody['tanggal'];
+    $pembeli_id = $parsedBody['pembeli_id'];
+
+    $db = $this->get(PDO::class);
+
+    try {
+        $query = $db->prepare('CALL CreateTransaksi(?, ?, ?)');
+        $query->bindParam(1, $transaksi_id, PDO::PARAM_INT);
+        $query->bindParam(2, $tanggal, PDO::PARAM_STR);
+        $query->bindParam(3, $pembeli_id, PDO::PARAM_INT);
+
+        $query->execute();
+
+        $response->getBody()->write(json_encode(
+            [
+                'message' => 'Detail transaksi disimpan dengan id ' . $transaksi_id
+            ]
+        ));
+    } catch (PDOException $e) {
+        $response->getBody()->write(json_encode(
+            [
+                'error' => 'Gagal menyimpan transaksi: ' . $e->getMessage()
+            ]
+        ));
+    }
+    return $response->withHeader("Content-Type", "application/json");
+});
+
 };
