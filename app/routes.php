@@ -182,13 +182,13 @@ return function (App $app) {
 
             $response->getBody()->write(json_encode(
                 [
-                    'message' => 'Detail buah disimpan dengan id ' . $buah_id
+                    'message' => 'buah BERHASIL disimpan dengan id ' . $buah_id
                 ]
             ));
         } catch (PDOException $e) {
             $response->getBody()->write(json_encode(
                 [
-                    'error' => 'Gagal menyimpan buah: ' . $e->getMessage()
+                    'error' => 'buah GAGAL disimpan: ' . $e->getMessage()
                 ]
             ));
         }
@@ -217,13 +217,13 @@ return function (App $app) {
 
             $response->getBody()->write(json_encode(
                 [
-                    'message' => 'Detail penjual disimpan dengan id ' . $penjual_id
+                    'message' => 'penjual BERHASIL disimpan dengan id ' . $penjual_id
                 ]
             ));
         } catch (PDOException $e) {
             $response->getBody()->write(json_encode(
                 [
-                    'error' => 'Gagal menyimpan penjual: ' . $e->getMessage()
+                    'error' => 'penjual GAGAL disimpan: ' . $e->getMessage()
                 ]
             ));
         }
@@ -252,13 +252,13 @@ return function (App $app) {
 
             $response->getBody()->write(json_encode(
                 [
-                    'message' => 'Detail pembeli disimpan dengan id ' . $pembeli_id
+                    'message' => 'pembeli BERHASIL disimpan dengan id ' . $pembeli_id
                 ]
             ));
         } catch (PDOException $e) {
             $response->getBody()->write(json_encode(
                 [
-                    'error' => 'Gagal menyimpan pembeli: ' . $e->getMessage()
+                    'error' => 'pembeli GAGAL disimpan: ' . $e->getMessage()
                 ]
             ));
         }
@@ -289,13 +289,13 @@ return function (App $app) {
 
             $response->getBody()->write(json_encode(
                 [
-                    'message' => 'Detail transaksi disimpan dengan id ' . $detail_transaksi_id
+                    'message' => 'transaksi BERHASIL disimpan dengan id ' . $detail_transaksi_id
                 ]
             ));
         } catch (PDOException $e) {
             $response->getBody()->write(json_encode(
                 [
-                    'error' => 'Gagal menyimpan detail transaksi: ' . $e->getMessage()
+                    'error' => 'transaksi GAGAL disimpan: ' . $e->getMessage()
                 ]
             ));
         }
@@ -322,13 +322,13 @@ return function (App $app) {
 
             $response->getBody()->write(json_encode(
                 [
-                    'message' => 'Detail transaksi disimpan dengan id ' . $transaksi_id
+                    'message' => 'transaksi BERHASIL disimpan dengan id ' . $transaksi_id
                 ]
             ));
         } catch (PDOException $e) {
             $response->getBody()->write(json_encode(
                 [
-                    'error' => 'Gagal menyimpan transaksi: ' . $e->getMessage()
+                    'error' => 'transaksi GAGAL disimpan: ' . $e->getMessage()
                 ]
             ));
         }
@@ -464,6 +464,220 @@ return function (App $app) {
         }
         return $response->withHeader("Content-Type", "application/json");
     });
+
+    //PUT buah
+    $app->put('/buah/{buah_id}', function (Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+        $id = $args['buah_id']; // Use 'buah_id' as defined in your route
+        $parsedBody = $request->getParsedBody();
+
+        $newNama = isset($parsedBody['p_nama_buah']) ? $parsedBody['p_nama_buah'] : null;
+        $newHarga = isset($parsedBody['p_harga']) ? $parsedBody['p_harga'] : null;
+        $newStok = isset($parsedBody['p_stok']) ? $parsedBody['p_stok'] : null;
+
+        if ($newNama === null && $newHarga === null && $newStok === null) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'No data to update.'
+                ]
+            ));
+            return $response->withStatus(400); // Set the status code to 400 Bad Request or as needed
+        }
+        try {
+            $query = $db->prepare('CALL UpdateBuah(?, ?, ?, ?)');
+            $query->bindParam(1, $id, PDO::PARAM_INT);
+            $query->bindParam(2, $newNama, PDO::PARAM_STR);
+            $query->bindParam(3, $newHarga, PDO::PARAM_INT);
+            $query->bindParam(4, $newStok, PDO::PARAM_INT);
+
+            $query->execute();
+
+            $response->getBody()->write(json_encode(
+                [
+                    'message' => 'Buah with id ' . $id . ' has been updated'
+                ]
+            ));
+        } 
+        catch (PDOException $e) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'Failed to update buah: ' . $e->getMessage()
+                ]
+            ));
+        }
+        return $response->withHeader("Content-Type", "application/json");
+    });
+
+    //PUT penjual
+    $app->put('/penjual/{penjual_id}', function (Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+        $id = $args['penjual_id']; // Use 'detail_transaksi_id' as defined in your route
+        $parsedBody = $request->getParsedBody();
+    
+        $newNamaPenjual = isset($parsedBody['p_new_nama_penjual']) ? $parsedBody['p_new_nama_penjual'] : null;
+        $newAlamatPenjual = isset($parsedBody['p_new_alamat_penjual']) ? $parsedBody['p_new_alamat_penjual'] : null;
+        $newTeleponPenjual = isset($parsedBody['p_new_telepon_penjual']) ? $parsedBody['p_new_telepon_penjual'] : null;
+    
+        if ($newNamaPenjual === null && $newAlamatPenjual === null && $newTeleponPenjual === null) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'No data to update.'
+                ]
+            ));
+            return $response->withStatus(400); // Set the status code to 400 Bad Request or as needed
+        }
+        try {
+            $query = $db->prepare('CALL UpdatePenjual(?, ?, ?, ?)');
+            $query->bindParam(1, $id, PDO::PARAM_INT);
+            $query->bindParam(2, $newNamaPenjual, PDO::PARAM_STR);
+            $query->bindParam(3, $newAlamatPenjual, PDO::PARAM_STR);
+            $query->bindParam(4, $newTeleponPenjual, PDO::PARAM_STR);
+    
+            $query->execute();
+    
+            $response->getBody()->write(json_encode(
+                [
+                    'message' => 'Penjual with id ' . $id . ' has been updated'
+                ]
+            ));
+        } catch (PDOException $e) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'Failed to update penjual: ' . $e->getMessage()
+                ]
+            ));
+        }
+        return $response->withHeader("Content-Type", "application/json");
+    });
+    
+    //PUT pembeli
+    $app->put('/pembeli/{pembeli_id}', function (Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+        $id = $args['pembeli_id']; // Use 'detail_transaksi_id' as defined in your route
+        $parsedBody = $request->getParsedBody();
+    
+        $newNama = isset($parsedBody['p_new_nama']) ? $parsedBody['p_new_nama'] : null;
+        $newAlamat = isset($parsedBody['p_new_alamat']) ? $parsedBody['p_new_alamat'] : null;
+        $newTelepon = isset($parsedBody['p_new_telepon']) ? $parsedBody['p_new_telepon'] : null;
+    
+        if ($newNama === null && $newAlamat === null && $newTelepon === null) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'No data to update.'
+                ]
+            ));
+            return $response->withStatus(400); // Set the status code to 400 Bad Request or as needed
+        }
+        try {
+            $query = $db->prepare('CALL UpdatePembeli(?, ?, ?, ?)');
+            $query->bindParam(1, $id, PDO::PARAM_INT);
+            $query->bindParam(2, $newNama, PDO::PARAM_STR);
+            $query->bindParam(3, $newAlamat, PDO::PARAM_STR);
+            $query->bindParam(4, $newTelepon, PDO::PARAM_STR);
+    
+            $query->execute();
+    
+            $response->getBody()->write(json_encode(
+                [
+                    'message' => 'Pembeli with id ' . $id . ' has been updated'
+                ]
+            ));
+        } 
+        catch (PDOException $e) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'Failed to update pembeli: ' . $e->getMessage()
+                ]
+            ));
+        }
+        return $response->withHeader("Content-Type", "application/json");
+    });
+    
+    //PUT detail transaksi
+    $app->put('/detail_transaksi/{detail_transaksi_id}', function (Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+        $id = $args['detail_transaksi_id']; // Use 'buah_id' as defined in your route
+        $parsedBody = $request->getParsedBody();
+    
+        $newTransaksiId = isset($parsedBody['p_new_transaksi_id']) ? $parsedBody['p_new_transaksi_id'] : null;
+        $newBuahId = isset($parsedBody['p_new_buah_id']) ? $parsedBody['p_new_buah_id'] : null;
+        $newJumlah = isset($parsedBody['p_new_jumlah']) ? $parsedBody['p_new_jumlah'] : null;
+        $newHargaTotal = isset($parsedBody['p_new_harga_total']) ? $parsedBody['p_new_harga_total'] : null;
+    
+        if ($newTransaksiId === null && $newBuahId === null && $newJumlah === null && $newHargaTotal === null) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'No data to update.'
+                ]
+            ));
+            return $response->withStatus(400); // Set the status code to 400 Bad Request or as needed
+        }
+        try {
+            $query = $db->prepare('CALL UpdateDetailTransaksi(?, ?, ?, ?, ?)');
+            $query->bindParam(1, $id, PDO::PARAM_INT);
+            $query->bindParam(2, $newTransaksiId, PDO::PARAM_INT);
+            $query->bindParam(3, $newBuahId, PDO::PARAM_INT);
+            $query->bindParam(4, $newJumlah, PDO::PARAM_INT);
+            $query->bindParam(5, $newHargaTotal, PDO::PARAM_INT);
+    
+            $query->execute();
+    
+            $response->getBody()->write(json_encode(
+                [
+                    'message' => 'Detail transaksi with id ' . $id . ' has been updated'
+                ]
+            ));
+        } 
+        catch (PDOException $e) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'Failed to update detail transaksi: ' . $e->getMessage()
+                ]
+            ));
+        }
+        return $response->withHeader("Content-Type", "application/json");
+    });
+    
+    //PUT transaksi
+    $app->put('/transaksi/{transaksi_id}', function (Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+        $id = $args['transaksi_id']; // Use 'detail_transaksi_id' as defined in your route
+        $parsedBody = $request->getParsedBody();
+    
+        $newTanggal = isset($parsedBody['p_new_tanggal']) ? $parsedBody['p_new_tanggal'] : null;
+        $newPembeliId = isset($parsedBody['p_new_pembeli_id']) ? $parsedBody['p_new_pembeli_id'] : null;
+    
+        if ($newTanggal === null && $newPembeliId === null) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'No data to update.'
+                ]
+            ));
+            return $response->withStatus(400); // Set the status code to 400 Bad Request or as needed
+        }
+        try {
+            $query = $db->prepare('CALL UpdateTransaksi(?, ?, ?)');
+            $query->bindParam(1, $id, PDO::PARAM_INT);
+            $query->bindParam(2, $newTanggal, PDO::PARAM_STR); // Assuming 'p_new_tanggal' is a DATE
+            $query->bindParam(3, $newPembeliId, PDO::PARAM_INT);
+    
+            $query->execute();
+    
+            $response->getBody()->write(json_encode(
+                [
+                    'message' => 'Transaksi with id ' . $id . ' has been updated'
+                ]
+            ));
+        } catch (PDOException $e) {
+            $response->getBody()->write(json_encode(
+                [
+                    'error' => 'Failed to update transaksi: ' . $e->getMessage()
+                ]
+            ));
+        }
+        return $response->withHeader("Content-Type", "application/json");
+    });
+    
 };
 
 
