@@ -677,7 +677,67 @@ return function (App $app) {
         }
         return $response->withHeader("Content-Type", "application/json");
     });
+
+    // GET NOTA
+    $app->get('/nota', function(Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
     
+        try {
+            // Menyiapkan SQL untuk memanggil view nota_view
+            $sql = "CALL invoice_nota();";
+            $stmt = $db->prepare($sql);
+    
+            // Jalankan query
+            $stmt->execute();
+    
+            // Mengambil hasil dari query
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+            if ($result) {
+                $response->getBody()->write(json_encode($result));
+            } else {
+                // Jika data tidak ditemukan, kirim respons dengan status 404
+                $response->getBody()->write(json_encode(['error' => 'Data nota tidak ditemukan']));
+                $response = $response->withStatus(404);
+            }
+        } catch (PDOException $e) {
+            // Tangani kesalahan eksekusi query
+            $response->getBody()->write(json_encode(['error' => $e->getMessage()]));
+            $response = $response->withStatus(500); // Atur status kode 500 untuk kesalahan server
+        }
+    
+        return $response->withHeader("Content-Type", "application/json");
+    });
+    
+    $app->get('/nota_pd', function(Request $request, Response $response, $args) {
+        $db = $this->get(PDO::class);
+    
+        try {
+            // Menyiapkan SQL untuk memanggil view nota_view
+            $sql = "CALL invoice_nota_final();";
+            $stmt = $db->prepare($sql);
+    
+            // Jalankan query
+            $stmt->execute();
+    
+            // Mengambil hasil dari query
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+            if ($result) {
+                $response->getBody()->write(json_encode($result));
+            } else {
+                // Jika data tidak ditemukan, kirim respons dengan status 404
+                $response->getBody()->write(json_encode(['error' => 'Data nota tidak ditemukan']));
+                $response = $response->withStatus(404);
+            }
+        } catch (PDOException $e) {
+            // Tangani kesalahan eksekusi query
+            $response->getBody()->write(json_encode(['error' => $e->getMessage()]));
+            $response = $response->withStatus(500); // Atur status kode 500 untuk kesalahan server
+        }
+    
+        return $response->withHeader("Content-Type", "application/json");
+    });
 };
 
 
